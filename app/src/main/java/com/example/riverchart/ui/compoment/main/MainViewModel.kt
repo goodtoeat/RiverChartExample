@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.riverchart.data.DataRepositorySource
+import com.example.riverchart.data.Resource
 import com.example.riverchart.dto.RiverData
 import com.example.riverchart.ui.base.BaseViewModel
 import com.example.riverchart.utils.MPChartHelp
@@ -27,8 +28,17 @@ class MainViewModel @Inject constructor(
     fun getRiverRawData(){
         viewModelScope.launch {
             dataRepository.doDataRequest().collect(){
-                xLabelPrivate.value = getMPChartXValue(it.data!!)
-                lineDataPrivate.value = handleRiverData(it.data!!)
+                when (it){
+                    is Resource.Success -> {
+                        xLabelPrivate.value = getMPChartXValue(it.data!!)
+                        lineDataPrivate.value = handleRiverData(it.data)
+                    }
+                    is Resource.DataError ->{
+                        // Request error
+                    }
+                    is Resource.Loading -> {}
+                }
+
             }
         }
     }
